@@ -130,7 +130,7 @@ local function schedule_clean()
 	local last_time = storage:get_int("last_clear_time")
 	local current_time = os.time()
 	local diff_time = current_time - last_time
-	local delay = math.max(0, 30 - diff_time)
+	local delay = math.max(0, 86400 - diff_time)
 
 	core.after(delay, function()
 		storage:set_int("last_clear_time", os.time())
