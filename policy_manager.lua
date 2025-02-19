@@ -1,3 +1,10 @@
+--[[
+Настройка "политики" работы детектора.
+Например: максимальное время хранения ip адресов белого и черного списка,
+действие при обнаружении входа с использованием VPN,
+работа самого детектора(вкл/выкл), автоматическая очистка(вкл/выкл).
+]]
+
 local storage = core.get_mod_storage("vpndetect")
 local modpath = core.get_modpath("vpndetect")
 local sql = vpndetect.sql
@@ -7,6 +14,7 @@ local actions = vpndetect.actions
 local format_table = dofile(modpath .. "/table_formatter.lua")
 
 
+--Проверяет правильно ли введен параметр число
 local function num_validator(param)
 	param = tonumber(param)
 	if param ~= nil then
@@ -16,6 +24,7 @@ local function num_validator(param)
 end
 
 
+--Проверяет правильно ли введен булевый параметр
 local function bool_validator(value)
 	if value ~= "true" and value ~= "false" then
 		return nil, "Value can only be true or false"
@@ -24,6 +33,7 @@ local function bool_validator(value)
 end
 
 
+--Проверяет правильно ли введено action
 local function action_validator(value)
 	if actions[value] then
 		return value
@@ -37,6 +47,7 @@ local function action_validator(value)
 end
 
 
+--Возможные опции политики.
 local options = {
 	whitelist_max_age = {
 		type = "number",
@@ -83,6 +94,8 @@ The action that will be performed if a VPN connection is detected:
 }
 
 
+--Геттеры опций.
+--По сути привдоят записанное в mod_storage к определенному типу.
 local option_getters = {
 	["number"] = function(id)
 		local val = storage:get_int(id)
@@ -103,6 +116,8 @@ local option_getters = {
 }
 
 
+--Сеттеры опций.
+--Сохраняют значения опции в mod_storage
 local option_setters = {
 	["number"] = function(id, value)
 		storage:set_int(id, value)
@@ -119,6 +134,7 @@ local option_setters = {
 }
 
 
+--Инициализирует опции, если не заданы применяет значения по умолчанию.
 local function init_options()
 	vpndetect.log("info", "Policy manager initializing options...")
 	for id, option in pairs(options) do
@@ -140,6 +156,7 @@ end
 init_options()
 
 
+--Установить опцию option_id в значение value.
 function policy:set_option(option_id, value)
 	local opt = options[option_id]
 	if not opt then return false, "Option " .. option_id .. " does not exist" end
@@ -152,6 +169,7 @@ function policy:set_option(option_id, value)
 end
 
 
+--Получить значение опции option_id.
 function policy:get_option(option_id)
 	local opt = options[option_id]
 	if not opt then return nil, "Option " .. option_id .. " does not exist" end
@@ -159,6 +177,7 @@ function policy:get_option(option_id)
 end
 
 
+--Команда для установки опции в определенное значение.
 core.register_chatcommand("vdt_policy_set", {
 	params = "<option_id> <value>",
 	privs = {vpndetect_admin=true},
@@ -174,6 +193,7 @@ core.register_chatcommand("vdt_policy_set", {
 })
 
 
+--Показать опции и выбранные в них значения.
 core.register_chatcommand("vdt_policy_options", {
 	description = "Show current policy options",
 	privs = {vpndetect_admin=true},
@@ -190,6 +210,7 @@ core.register_chatcommand("vdt_policy_options", {
 })
 
 
+--Показать подсказку по конкретной опции.
 core.register_chatcommand("vdt_policy_help", {
 	params = "<option_id>",
 	privs = {vpndetect_admin=true},

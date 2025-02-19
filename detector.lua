@@ -1,3 +1,10 @@
+--[[
+Работа VPN детектора.
+Обработка подключений игроков, проверка ip адреса и применение
+соответствующих действий в случае обнаружения VPN
+]]
+
+
 local storage = core.get_mod_storage("vpndetect")
 local sql = vpndetect.sql
 local policy = vpndetect.policy
@@ -7,7 +14,8 @@ local actions = vpndetect.actions
 local names_cache = {}
 
 
-local function ip_processing(player_name, ip_type)
+--Применение действий в соответсвии с ip адресом
+local function player_processing(player_name, ip_type)
 	if ip_type == "whitelist" then
 		return
 	end
@@ -19,6 +27,7 @@ local function ip_processing(player_name, ip_type)
 end
 
 
+--Парсинг данных при от vpnapi.io
 local function parse_data(data)
 	if data.ip == nil then
 		return nil, "Ip not found in vpnapi response"
@@ -39,6 +48,7 @@ local function parse_data(data)
 end
 
 
+--Обработка ответа от vpnapi.io
 local function response_process(result)
 	if result.timeout ~= false then
 		vpndetect.log("error", "IP request time has expired, the ip cannot be verified")
@@ -66,10 +76,11 @@ local function response_process(result)
 	end
 	names_cache[ip_table.ip] = nil
 
-	ip_processing(name, ip_table.type)
+	player_processing(name, ip_table.type)
 end
 
 
+--Запрос к vpnapi.io
 local function request_ip(name, ip)
 	local key = storage:get_string("vpnapi_key")
 	if key == "" then
@@ -86,6 +97,7 @@ local function request_ip(name, ip)
 end
 
 
+--Обработка "подключений" к серверу
 core.register_on_joinplayer(function(player)
 	if not policy:get_option("detector_enabled") then
 		vpndetect.log("warning", "vpn detector disabled, ip will not be verified")
@@ -97,13 +109,14 @@ core.register_on_joinplayer(function(player)
 
 	local record = sql:get_ip(ip)
 	if record ~= nil then
-		ip_processing(name, record.type)
+		player_processing(name, record.type)
 		return
 	end
 	request_ip(name, ip)
 end)
 
 
+--Установить api ключ vpnapi.io
 core.register_chatcommand("vdt_set_apikey", {
 	params = "<key>",
 	privs = {vpndetect_admin=true},
@@ -115,11 +128,22 @@ core.register_chatcommand("vdt_set_apikey", {
 })
 
 
+--Показать установленный ключ vpnapi.io
 core.register_chatcommand("vdt_show_apikey", {
 	description = "Show seted api key for vpnapi.io",
 	privs = {vpndetect_admin=true},
 	func = function()
 		local key = storage:get_string("vpnapi_key")
 		return true, "Key: " .. key
+	end
+})
+
+
+--В будущем. Статус работы детектора.
+core.register_chatcommand("vdt_status", {
+	description = "Show vpndetector status",
+	privs = {vpndetect_admin=true},
+	func = function()
+
 	end
 })

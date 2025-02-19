@@ -1,3 +1,7 @@
+--[[
+Формирует строку из таблицы.
+]]
+
 local function format_table(data, separator)
     -- Определяем максимальную ширину для каждого столбца
     local column_widths = {}

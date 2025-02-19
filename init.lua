@@ -21,8 +21,8 @@ vpndetect.actions = {}
 vpndetect.ie = core.request_insecure_environment()
 vpndetect.http_api = http_api
 
+dofile(modpath .. "/sql.lua")
 dofile(modpath .. "/lists_manager.lua")
 dofile(modpath .. "/actions_on_detect.lua")
 dofile(modpath .. "/policy_manager.lua")
 dofile(modpath .. "/detector.lua")
-dofile(modpath .. "/sql.lua")

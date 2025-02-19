@@ -1,6 +1,12 @@
+--[[
+Действия при обнаружении подключения с VPN
+]]
+
+
 local actions = vpndetect.actions
 
 
+--Кикнуть игрока
 actions.kick = function (player_name)
 	if core.get_player_by_name(player_name) == nil then
 		return

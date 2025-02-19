@@ -1,7 +1,11 @@
+--[[
+Вспомогательный функции для работы с ip адресами.
+]]
+
 local ip_tools = {}
 
 
-
+--Проверить валидность ip адреса, записанного в виде строки.
 function ip_tools:validate_ipstr(ipstr)
 	local nums = string.split(ipstr, ".")
 	if #nums ~= 4 then return false end
@@ -15,6 +19,7 @@ function ip_tools:validate_ipstr(ipstr)
 end
 
 
+--Проверить валидность всех ip адресов, разделенных разделителем(sep).
 function ip_tools:parse_ipstrs(ipstrs, sep)
 	local ipstrs = string.split(ipstrs, sep)
 

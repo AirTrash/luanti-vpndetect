@@ -1,3 +1,8 @@
+--[[
+Работа со списками ip адресов.
+Добавление в список, удаление, вывод списка, очистка старых записей (ручная/автоматическая).
+]]
+
 local storage = core.get_mod_storage()
 local worldpath = core.get_worldpath()
 local modpath = core.get_modpath("vpndetect")
@@ -8,6 +13,7 @@ local ip_tools = dofile(modpath .. "/ip_tools.lua")
 local sql = vpndetect.sql
 
 
+--Получить ip адреса в виде строки
 local function get_ips(type_)
 	local list
 	local values
@@ -29,6 +35,7 @@ local function get_ips(type_)
 end
 
 
+--Установить ip адрес(а) в "белый" или "черный" список.
 local function set_ips_type(ips, type_)
 	local ips = ip_tools:parse_ipstrs(ips, ",")
 
@@ -43,6 +50,7 @@ local function set_ips_type(ips, type_)
 end
 
 
+--Очистить устаревшие записи из БД
 function clear_old_records()
 	local white_age = storage:get_int("whitelist_max_age")
 	local black_age = storage:get_int("blacklist_max_age")
@@ -59,6 +67,7 @@ function clear_old_records()
 end
 
 
+--Показать черный список.
 core.register_chatcommand("vdt_blacklist", {
 	description = "Show first 50 black list records",
 	privs = {vpndetect_admin=true},
@@ -68,6 +77,7 @@ core.register_chatcommand("vdt_blacklist", {
 })
 
 
+--Показать белый список.
 core.register_chatcommand("vdt_whitelist", {
 	description = "Show first 50 white list records",
 	privs = {vpndetect_admin=true},
@@ -77,6 +87,7 @@ core.register_chatcommand("vdt_whitelist", {
 })
 
 
+--Установить ip адрес(а) в белый список.
 core.register_chatcommand("vdt_set_ip_white", {
 	params = "<ip_addresses>",
 	privs = {vpndetect_admin=true},
@@ -87,6 +98,7 @@ core.register_chatcommand("vdt_set_ip_white", {
 })
 
 
+--Установить ip адрес(а) в черный список.
 core.register_chatcommand("vdt_set_ip_black", {
 	params = "<ip_addresses>",
 	privs = {vpndetect_admin=true},
@@ -97,6 +109,7 @@ core.register_chatcommand("vdt_set_ip_black", {
 })
 
 
+--Удалить ip адрес из БД.
 core.register_chatcommand("vdt_del_ip", {
 	params = "<ip_addresses>",
 	privs = {vpndetect_admin=true},
@@ -116,6 +129,7 @@ core.register_chatcommand("vdt_del_ip", {
 })
 
 
+--Ручная очистка устаревших записей из БД.
 core.register_chatcommand("vdt_clear_old_records", {
 	description = "Run the process of cleaning old records manually",
 	privs = {vpndetect_admin=true},
@@ -126,6 +140,7 @@ core.register_chatcommand("vdt_clear_old_records", {
 })
 
 
+--Запланировать автоматическую очистку.
 local function schedule_clean()
 	local last_time = storage:get_int("last_clear_time")
 	local current_time = os.time()
